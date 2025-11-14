@@ -23,7 +23,7 @@ export const sequelize = new Sequelize(
       const prefix = currentRoute ? chalk.yellow(`[${currentRoute}]`) : "";
       console.log(prefix, chalk.cyanBright("[SQL]"), chalk.gray(msg)); 
     },
-    
+
     dialectOptions: {
       ssl: {
         require: true,
