@@ -1,17 +1,14 @@
-import { Sequelize } from "sequelize";
-import dotenv from "dotenv";
-import chalk from "chalk";
-
-dotenv.config();
+const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
 // Track current route for SQL logging
 let currentRoute = "";
-export function setCurrentRoute(route) {
+function setCurrentRoute(route) {
   currentRoute = route;
 }
 
 // Create Sequelize instance
-export const sequelize = new Sequelize(
+const sequelize = new Sequelize(
   process.env.DB_NAME,     // Database name
   process.env.DB_USER,     // Username
   process.env.DB_PASS,     // Password
@@ -19,11 +16,7 @@ export const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: "postgres",
-    logging: (msg) => {
-      const prefix = currentRoute ? chalk.yellow(`[${currentRoute}]`) : "";
-      console.log(prefix, chalk.cyanBright("[SQL]"), chalk.gray(msg)); 
-    },
-
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
     dialectOptions: {
       ssl: {
         require: true,
@@ -34,11 +27,19 @@ export const sequelize = new Sequelize(
 );
 
 // Test database connection
-export async function testConnection() {
+async function testConnection() {
   try {
     await sequelize.authenticate();
-    console.log(chalk.green("✅ Database connection has been established successfully."));
+    console.log("✅ Database connection has been established successfully.");
+    return true;
   } catch (error) {
-    console.error(chalk.red("❌ Unable to connect to the database:"), error.message);
+    console.error("❌ Unable to connect to the database:", error.message);
+    return false;
   }
 }
+
+module.exports = {
+  sequelize,
+  testConnection,
+  setCurrentRoute
+};
